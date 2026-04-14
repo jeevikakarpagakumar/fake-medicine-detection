@@ -1,0 +1,67 @@
+# 🔹 Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 🔹 Virtual environments
+venv/
+.env/
+env/
+ENV/
+
+# 🔹 Environment variables
+.env
+.env.*
+
+# 🔹 Flask specific
+instance/
+.webassets-cache
+
+# 🔹 Logs
+*.log
+logs/
+
+# 🔹 Database files
+*.db
+*.sqlite3
+
+# 🔹 OS files
+.DS_Store
+Thumbs.db
+
+# 🔹 IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 🔹 Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# 🔹 Build / distribution
+build/
+dist/
+*.egg-info/
+
+# 🔹 Coverage / testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# 🔹 API keys / secrets
+secrets.json
+config.json
+
+# 🔹 Uploaded files (if any)
+uploads/
+static/uploads/
+
+# 🔹 Model files (if large ML models)
+*.h5
+*.pkl
+*.joblib
+*.pt
+
+# 🔹 Temporary files
+*.tmp
+*.temp

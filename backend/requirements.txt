@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pandas
+easyocr
+fuzzywuzzy
+python-Levenshtein
+pyzbar
+scikit-learn
+matplotlib
+opencv-python-headless
+python-multipart

@@ -1,0 +1,33 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+
+# Build outputs
+build/
+
+# Flutter plugins
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# Android
+android/.gradle/
+android/app/build/
+
+# macOS
+macos/Flutter/Flutter.framework
+
+# Windows/Linux
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# IDE
+.idea/
+*.iml
