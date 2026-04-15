@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/medicine_result.dart';
 import '../widgets/result_card.dart';
+import 'chat_screen.dart';
 
 class ResultScreen extends StatelessWidget {
   final MedicineResult result;
@@ -12,6 +13,20 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0D1117),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF3ECFCF),
+        child: const Icon(Icons.chat_bubble_outline, color: Colors.black),
+        onPressed: () {
+          final contextData = result.toString();
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ChatScreen(context: contextData),
+            ),
+          );
+        },
+      ),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0D1117),
         elevation: 0,

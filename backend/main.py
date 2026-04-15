@@ -3,7 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import shutil, os
 from config import TEMP_DIR
 from utils.ocr import extract_text
+
 from utils.validator import validate
+from utils.chatbot import ask_chatbot
+from pydantic import BaseModel
+
 
 app = FastAPI(title="Fake Medicine Detection API 🚀")
 
@@ -38,3 +42,12 @@ async def upload_image(file: UploadFile = File(...)):
         return {"extracted_text": text, "result": result}
     except Exception as e:
         return {"error": str(e)}
+
+class ChatRequest(BaseModel):
+    message: str
+    context: str = None
+
+@app.post("/chat")
+async def chat(req: ChatRequest):
+    reply = ask_chatbot(req.message, req.context)
+    return {"response": reply}

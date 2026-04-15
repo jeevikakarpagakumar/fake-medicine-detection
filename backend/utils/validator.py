@@ -6,11 +6,11 @@ from utils.matcher import find_match
 from utils.barcode import scan_barcode
 from ml.predict import predict_medicine
 
-# ---------- DB CONNECTION ----------
+# DB CONNECTION
 conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 cursor = conn.cursor()
 
-# ---------- EXTRACT BATCH ----------
+# EXTRACT BATCH 
 def extract_batch(text):
     patterns = [
         r"batch\s*no[:\s]*([a-zA-Z0-9]+)",
@@ -22,14 +22,14 @@ def extract_batch(text):
             return m.group(1)
     return None
 
-# ---------- VALIDATE ----------
+# VALIDATE 
 def validate(text, image_path=None):
 
     match, score = find_match(text)
     batch = extract_batch(text)
     barcode = scan_barcode(image_path) if image_path else None
 
-    # ---------- NO MATCH ----------
+    # NO MATCH 
     if not match:
         return {
             "status": "Suspicious",
@@ -38,7 +38,7 @@ def validate(text, image_path=None):
             "ml_confidence": 0
         }
 
-    # ---------- FETCH FROM DB ----------
+    #  FETCH FROM DB 
     cursor.execute(
         "SELECT name, manufacturer, composition, price FROM medicines WHERE LOWER(name)=?",
         (match,)
@@ -55,7 +55,7 @@ def validate(text, image_path=None):
 
     name, manufacturer, composition, price = row
 
-    # ---------- RULE-BASED SCORING ----------
+    # RULE-BASED SCORING 
     confidence = 50
 
     # Name similarity score
@@ -84,7 +84,7 @@ def validate(text, image_path=None):
     if batch:
         confidence += 5
 
-    # ---------- RULE STATUS ----------
+    # RULE STATUS 
     if confidence >= 85:
         status = "Genuine"
     elif confidence >= 60:
@@ -92,7 +92,7 @@ def validate(text, image_path=None):
     else:
         status = "Suspicious"
 
-    # ---------- ML FEATURES ----------
+    # ML FEATURES 
     features = {
         "name_length": len(name),
         "manufacturer_match": 1 if manufacturer else 0,
@@ -100,7 +100,7 @@ def validate(text, image_path=None):
         "price": price
     }
 
-    # ---------- ML PREDICTION ----------
+    # ML PREDICTION 
     try:
         ml_result = predict_medicine(features)
     except:
@@ -109,13 +109,13 @@ def validate(text, image_path=None):
             "confidence": 0
         }
 
-    # ---------- FINAL DECISION (COMBINED) ----------
+    # FINAL DECISION (COMBINED) 
     if ml_result["prediction"] == "Fake" and confidence < 70:
         final_status = "Suspicious"
     else:
         final_status = status
 
-    # ---------- RESPONSE ----------
+    # RESPONSE 
     return {
         "medicine": name,
         "manufacturer": manufacturer,

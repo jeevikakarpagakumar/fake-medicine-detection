@@ -1,11 +1,11 @@
 import pandas as pd
 
-# ---------- LOAD ----------
+# LOAD 
 train_df = pd.read_csv("../dataset/training_data.csv")
 test_df = pd.read_csv("../dataset/test_data.csv")
 ref_df = pd.read_csv("../dataset/medicines.csv")
 
-# ---------- CLEAN ----------
+# CLEAN
 ref_df.columns = [c.strip().lower() for c in ref_df.columns]
 
 ref_df = ref_df.rename(columns={
@@ -22,7 +22,7 @@ ref_df["composition"] = (
 manufacturer_set = set(ref_df["manufacturer"])
 composition_set = set(ref_df["composition"])
 
-# ---------- FEATURE FUNCTION ----------
+# FEATURE FUNCTION 
 def create_features(df):
 
     feature_df = pd.DataFrame()
@@ -43,11 +43,11 @@ def create_features(df):
 
     return feature_df
 
-# ---------- APPLY ----------
+# APPLY 
 train_features = create_features(train_df)
 test_features = create_features(test_df)
 
-# ---------- SAVE ----------
+# SAVE 
 train_features.to_csv("../dataset/train_features.csv", index=False)
 test_features.to_csv("../dataset/test_features.csv", index=False)
 
