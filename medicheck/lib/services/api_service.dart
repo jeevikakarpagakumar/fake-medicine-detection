@@ -6,7 +6,7 @@ import '../models/medicine_result.dart';
 class ApiService {
   // Replace with your backend IP when running on a real device
   // Use 10.0.2.2 for Android emulator
-  static const String baseUrl = 'http://127.0.0.1:8000';
+  static const String baseUrl = 'http://192.168.0.40:5001';
 
   static Future<MedicineResult> verifyText(String text) async {
     final response = await http.post(
