@@ -6,11 +6,17 @@ from utils.matcher import find_match
 from utils.barcode import scan_barcode
 from ml.predict import predict_medicine
 
-# DB CONNECTION
+# DB
 conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 cursor = conn.cursor()
 
-# EXTRACT BATCH 
+
+#  NORMALIZE TEXT 
+def normalize(text):
+    return re.sub(r'[^a-zA-Z0-9\s]', '', text.lower())
+
+
+#  EXTRACT BATCH 
 def extract_batch(text):
     patterns = [
         r"batch\s*no[:\s]*([a-zA-Z0-9]+)",
@@ -22,14 +28,17 @@ def extract_batch(text):
             return m.group(1)
     return None
 
-# VALIDATE 
+
+#  VALIDATE 
 def validate(text, image_path=None):
+
+    text = normalize(text)
 
     match, score = find_match(text)
     batch = extract_batch(text)
     barcode = scan_barcode(image_path) if image_path else None
 
-    # NO MATCH 
+    #  NO MATCH 
     if not match:
         return {
             "status": "Suspicious",
@@ -38,7 +47,7 @@ def validate(text, image_path=None):
             "ml_confidence": 0
         }
 
-    #  FETCH FROM DB 
+    #  FETCH 
     cursor.execute(
         "SELECT name, manufacturer, composition, price FROM medicines WHERE LOWER(name)=?",
         (match,)
@@ -55,10 +64,14 @@ def validate(text, image_path=None):
 
     name, manufacturer, composition, price = row
 
-    # RULE-BASED SCORING 
+    name_norm = normalize(name)
+    manufacturer_norm = normalize(manufacturer)
+    composition_norm = normalize(composition)
+
+    #  SCORING 
     confidence = 50
 
-    # Name similarity score
+    # 🔹 Name similarity
     if score > 90:
         confidence += 30
     elif score > 75:
@@ -68,39 +81,48 @@ def validate(text, image_path=None):
     else:
         confidence -= 15
 
-    # Name appears in text
-    if name.lower() in text:
-        confidence += 10
-
-    # Composition check
-    if composition and composition.lower() in text:
+    # 🔹 Name presence
+    if name_norm in text:
         confidence += 15
 
-    # Barcode presence
+    # 🔹 Manufacturer match (NEW FIX)
+    if manufacturer_norm in text:
+        confidence += 15
+
+    # 🔹 Composition fuzzy match (NEW FIX)
+    comp_words = composition_norm.split()
+    match_count = sum(1 for w in comp_words if w in text)
+
+    if match_count >= 2:
+        confidence += 15
+    elif match_count == 1:
+        confidence += 5
+
+    # 🔹 Barcode
     if barcode:
         confidence += 10
 
-    # Batch presence
+    # 🔹 Batch
     if batch:
         confidence += 5
 
-    # RULE STATUS 
-    if confidence >= 85:
+    #  RULE STATUS 
+    if confidence >= 75:   # lowered threshold
         status = "Genuine"
-    elif confidence >= 60:
+    elif confidence >= 55:
         status = "Needs Verification"
     else:
         status = "Suspicious"
 
-    # ML FEATURES 
+    #  ML FEATURES 
     features = {
         "name_length": len(name),
-        "manufacturer_match": 1 if manufacturer else 0,
-        "composition_match": 1 if composition else 0,
+        "manufacturer_match": 1 if manufacturer_norm in text else 0,
+        "composition_match": 1 if match_count >= 2 else 0,
         "price": price
     }
 
-    # ML PREDICTION 
+    #  ML 
     try:
         ml_result = predict_medicine(features)
     except:
@@ -109,13 +131,13 @@ def validate(text, image_path=None):
             "confidence": 0
         }
 
-    # FINAL DECISION (COMBINED) 
-    if ml_result["prediction"] == "Fake" and confidence < 70:
+    #  FINAL DECISION 
+    if ml_result["prediction"] == "Fake" and confidence < 65:
         final_status = "Suspicious"
     else:
         final_status = status
 
-    # RESPONSE 
+    #  RESPONSE 
     return {
         "medicine": name,
         "manufacturer": manufacturer,

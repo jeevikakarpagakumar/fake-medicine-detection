@@ -13,11 +13,11 @@ from sklearn.metrics import (
     precision_recall_curve
 )
 
-# ---------- CREATE PLOTS FOLDER ----------
+#  CREATE PLOTS FOLDER 
 PLOT_DIR = "../ml/plots"
 os.makedirs(PLOT_DIR, exist_ok=True)
 
-# ---------- LOAD DATA ----------
+#  LOAD DATA 
 train_df = pd.read_csv("../dataset/train_features.csv")
 test_df = pd.read_csv("../dataset/test_features.csv")
 
@@ -27,17 +27,17 @@ y_train = train_df["label"]
 X_test = test_df.drop("label", axis=1)
 y_test = test_df["label"]
 
-# ---------- MODEL ----------
+#  MODEL 
 model = RandomForestClassifier(n_estimators=100, random_state=42)
 
-# ---------- TRAIN ----------
+#  TRAIN 
 model.fit(X_train, y_train)
 
-# ---------- PREDICT ----------
+#  PREDICT 
 y_pred = model.predict(X_test)
 y_prob = model.predict_proba(X_test)[:, 1]
 
-# ---------- METRICS ----------
+#  METRICS 
 accuracy = accuracy_score(y_test, y_pred)
 
 print("✅ Model trained!")
@@ -45,7 +45,7 @@ print(f"Accuracy: {accuracy:.4f}")
 print("\nClassification Report:\n")
 print(classification_report(y_test, y_pred))
 
-# ---------- CONFUSION MATRIX ----------
+#  CONFUSION MATRIX 
 cm = confusion_matrix(y_test, y_pred)
 
 plt.figure()
@@ -61,7 +61,7 @@ for i in range(len(cm)):
 plt.savefig(f"{PLOT_DIR}/confusion_matrix.png")
 plt.close()
 
-# ---------- FEATURE IMPORTANCE ----------
+#  FEATURE IMPORTANCE 
 importances = model.feature_importances_
 features = X_train.columns
 
@@ -73,7 +73,7 @@ plt.xticks(rotation=45)
 plt.savefig(f"{PLOT_DIR}/feature_importance.png")
 plt.close()
 
-# ---------- ROC CURVE ----------
+#  ROC CURVE 
 fpr, tpr, _ = roc_curve(y_test, y_prob)
 roc_auc = auc(fpr, tpr)
 
@@ -87,7 +87,7 @@ plt.legend()
 plt.savefig(f"{PLOT_DIR}/roc_curve.png")
 plt.close()
 
-# ---------- PRECISION-RECALL ----------
+#  PRECISION-RECALL 
 precision, recall, _ = precision_recall_curve(y_test, y_prob)
 
 plt.figure()
@@ -99,7 +99,7 @@ plt.title("Precision-Recall Curve")
 plt.savefig(f"{PLOT_DIR}/precision_recall_curve.png")
 plt.close()
 
-# ---------- SAVE MODEL ----------
+#  SAVE MODEL 
 joblib.dump(model, "../models/model.pkl")
 
 print("\n✅ Model saved!")

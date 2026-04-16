@@ -2,36 +2,36 @@ import pandas as pd
 import random
 from sklearn.model_selection import train_test_split
 
-# ---------- LOAD DATA ----------
+#  LOAD DATA 
 df = pd.read_csv("../dataset/medicines.csv")
 
-# ---------- CLEAN COLUMN NAMES ----------
+#  CLEAN COLUMN NAMES 
 df.columns = [c.strip().lower() for c in df.columns]
 
-# ---------- RENAME ----------
+#  RENAME 
 df = df.rename(columns={
     "manufacturer_name": "manufacturer",
     "price(₹)": "price"
 })
 
-# ---------- CREATE COMPOSITION ----------
+#  CREATE COMPOSITION 
 df["composition"] = (
     df["short_composition1"].fillna("").astype(str) + " " +
     df["short_composition2"].fillna("").astype(str)
 ).str.strip()
 
-# ---------- SELECT ----------
+#  SELECT 
 df = df[["name", "manufacturer", "composition", "price"]]
 
-# ---------- CLEAN ----------
+#  CLEAN 
 df = df.dropna(subset=["name", "manufacturer", "composition", "price"])
 df["price"] = pd.to_numeric(df["price"], errors="coerce")
 df = df.dropna(subset=["price"])
 
-# ---------- LABEL ----------
+#  LABEL 
 df["label"] = 0
 
-# ---------- FAKE GENERATION ----------
+#  FAKE GENERATION 
 fake_rows = []
 
 def corrupt_text(text):
@@ -68,13 +68,13 @@ for _, row in df.iterrows():
 
 fake_df = pd.DataFrame(fake_rows)
 
-# ---------- COMBINE ----------
+#  COMBINE 
 final_df = pd.concat([df, fake_df], ignore_index=True)
 
 # Shuffle
 final_df = final_df.sample(frac=1).reset_index(drop=True)
 
-# ---------- TRAIN-TEST SPLIT ----------
+#  TRAIN-TEST SPLIT 
 train_df, test_df = train_test_split(
     final_df,
     test_size=0.2,   # 80% train, 20% test
@@ -82,7 +82,7 @@ train_df, test_df = train_test_split(
     stratify=final_df["label"]  # keeps balance
 )
 
-# ---------- SAVE ----------
+# SAVE 
 train_df.to_csv("../dataset/training_data.csv", index=False)
 test_df.to_csv("../dataset/test_data.csv", index=False)
 
